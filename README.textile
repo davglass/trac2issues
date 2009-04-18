@@ -1,0 +1,6 @@
+h1. Trac to GitHub Issues conversion script
+
+Waiting on API updates:
+http://github.com/develop/develop.github.com/issues#issue/4
+
+
