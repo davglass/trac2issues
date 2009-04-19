@@ -25,6 +25,7 @@ class ImportTickets:
     def __init__(self, trac=options.trac, project=options.project):
         self.env = open_environment(trac)
         self.trac = trac
+        self.includeClosed = True
         self.project = project
         self.now = datetime.now(utc)
         #Convert the timestamp from a float to an int to drop the .0
@@ -46,7 +47,7 @@ class ImportTickets:
             print_error("%s/%s: %s" % (self.login, self.project, data['error'][0]['error']))
         
         ##We own this project..
-        print bold('Nothing more from here, pending GitHub issues API updates')
+        self._fetchTickets()
 
     def ghAuth(self):
         login = os.popen('git config --global github.user').read().strip()
@@ -62,7 +63,53 @@ class ImportTickets:
 
     def _fetchTickets(self):
         print bold(red('_fetchTickets'))
+        cursor = self.db.cursor()        
+        
+        where = " where (status != 'closed') "
+        if self.includeClosed:
+            where = ""
 
+        sql = "select id, summary, description, milestone, component, reporter, owner from ticket %s order by id" % where
+        cursor.execute(sql)
+        # iterate through resultset
+        tickets = []
+        for id, summary, description, milestone, component, reporter, owner in cursor:
+            ticket = {
+                'id': id,
+                'summary': summary,
+                'description': description,
+                'milestone': milestone,
+                'component': component,
+                'reporter': reporter,
+                'owner': owner,
+                'history': []
+            }
+            cursor2 = self.db.cursor()        
+            sql = 'select author, time, newvalue from ticket_change where (ticket = %s) and (field = "comment")' % id
+            cursor2.execute(sql)
+            for author, time, newvalue in cursor2:
+                change = {
+                    'author': author,
+                    'time': time,
+                    'comment': newvalue
+                }
+                ticket['history'].append(change)
+
+            tickets.append(ticket)
+
+        #pp.pprint(tickets)
+        for data in tickets:
+            self.createIssue(data)
+
+        
+    def createIssue(self, data):
+        print bold('Creating issue')
+        pp.pprint(data)
+        #url = 'http://gist.github.com/gists'
+        #data = urllib.urlencode(out)
+        #req = urllib2.Request(url, data)
+        #response = urllib2.urlopen(req)
+        
 
 ##Format bold text
 def bold(str):
