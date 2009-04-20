@@ -1,5 +1,33 @@
 h1. Trac to GitHub Issues conversion script
 
+Imports are now working (still waiting on the Comment API)
+
+h2. Usage
+
+<pre class="console">$ ./trac2issues.py --help
+Usage: trac2issues.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -t TRAC, --trac=TRAC  Path to the Trac project to export.
+  -p PROJECT, --project=PROJECT
+                        Name of the GitHub Project to import into.
+  -x, --closed          Include closed tickets.
+  -c, --component       Create a label for the Trac component.
+  -m, --milestone       Create a label for the Trac milestone.
+  -o, --owner           Create a label for the Trac owner.
+  -r, --reporter        Add a comment naming the reporter.
+  -u URL, --url=URL     The base URL for the trac install (will also link to
+                        the old ticket in a comment).
+</pre>
+
+<pre class="console">
+sudo ./trac2issues.py \
+    -t /var/lib/trac/davglass \
+    -p footest -m -x -o -r -c \
+    -u http://bugs.davglass.com/projects/davglass
+</pre>
+
 Waiting on API updates:
 
 "Labels Listing":http://github.com/develop/develop.github.com/issues#issue/4
