@@ -35,7 +35,7 @@ class ImportTickets:
         self.now = datetime.now(utc)
         #Convert the timestamp from a float to an int to drop the .0
         self.stamp = int(math.floor(time.time()))
-        self.github = 'http://github.com/api/v2/json'
+        self.github = 'https://github.com/api/v2/json'
         try:
             self.db = self.env.get_db_cnx()
         except TracError, e:
@@ -154,16 +154,20 @@ class ImportTickets:
             print_error('GitHub didn\'t return an issue number :(')
 
         if self.labelMilestone and 'milestone' in info:
-            self.createLabel(num, "m:%s" % info['milestone'])
+            self.createLabel(num, "M:%s" % info['milestone'])
 
         if self.labelComponent and 'component' in info:
-            self.createLabel(num, "c:%s" % info['component'])
+            self.createLabel(num, "C:%s" % info['component'])
 
         if self.labelOwner and 'owner' in info:
-            self.createLabel(num, "o:%s" % info['owner'])
+            self.createLabel(num, "@%s" % info['owner'])
 
         if self.labelReporter and 'reporter' in info:
-            self.createLabel(num, "r:%s" % info['reporter'])
+            self.createLabel(num, "@@%s" % info['reporter'])
+        
+        for i in info['history']:
+            comment = "Author: %s\n%s" % (i['author'], i['comment'])
+            self.addComment(num, comment)
 
         if self.useURL:
             comment = "Ticket imported from Trac:\n %s%s" % (self.useURL, info['id'])
@@ -184,7 +188,16 @@ class ImportTickets:
         
     def addComment(self, num, comment):
         print bold("\tAdding comment to issue # %s" % num)
-        print red(bold('\tNot Working yet, need API access.'))
+        url = "%s/issues/comment/%s/%s/%s" % (self.github, self.login, self.project, num)
+        out = {
+            'login': self.login,
+            'token': self.token,
+            'comment': comment
+        }
+        data = urllib.urlencode(out)
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req)
+        
         
 
 ##Format bold text

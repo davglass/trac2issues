@@ -1,6 +1,6 @@
 h1. Trac to GitHub Issues conversion script
 
-Imports are now working (still waiting on the Comment API)
+Imports are now working, including comments
 
 h2. Usage
 
@@ -28,10 +28,5 @@ sudo ./trac2issues.py \
     -u http://bugs.davglass.com/projects/davglass
 </pre>
 
-Waiting on API updates:
-
-"Labels Listing":http://github.com/develop/develop.github.com/issues#issue/4
-
-"Add Comments to Issues":http://github.com/develop/develop.github.com/issues#issue/5
 
 
