@@ -97,12 +97,17 @@ class ImportTickets:
         # iterate through resultset
         tickets = []
         for id, summary, description, milestone, component, reporter, owner in cursor:
+            if milestone:
+                milestone = milestone.replace(' ', '_')
+            if component:
+                component = component.replace(' ', '_')
+            
             ticket = {
                 'id': id,
                 'summary': summary,
                 'description': description,
-                'milestone': milestone.replace(' ', '_'),
-                'component': component.replace(' ', '_'),
+                'milestone': milestone,
+                'component': component,
                 'reporter': reporter.replace(' ', '_'),
                 'owner': owner.replace(' ', '_'),
                 'history': []
@@ -154,10 +159,12 @@ class ImportTickets:
             print_error('GitHub didn\'t return an issue number :(')
 
         if self.labelMilestone and 'milestone' in info:
-            self.createLabel(num, "M:%s" % info['milestone'])
+            if info['milestone'] != None:
+                self.createLabel(num, "M:%s" % info['milestone'])
 
         if self.labelComponent and 'component' in info:
-            self.createLabel(num, "C:%s" % info['component'])
+            if info['component'] != None:
+                self.createLabel(num, "C:%s" % info['component'])
 
         if self.labelOwner and 'owner' in info:
             self.createLabel(num, "@%s" % info['owner'])
