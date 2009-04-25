@@ -101,6 +101,10 @@ class ImportTickets:
                 milestone = milestone.replace(' ', '_')
             if component:
                 component = component.replace(' ', '_')
+            if owner:
+                owner = owner.replace(' ', '_')
+            if reporter:
+                reporter = reporter.replace(' ', '_')
             
             ticket = {
                 'id': id,
@@ -108,8 +112,8 @@ class ImportTickets:
                 'description': description,
                 'milestone': milestone,
                 'component': component,
-                'reporter': reporter.replace(' ', '_'),
-                'owner': owner.replace(' ', '_'),
+                'reporter': reporter,
+                'owner': owner,
                 'history': []
             }
             cursor2 = self.db.cursor()        
@@ -167,13 +171,19 @@ class ImportTickets:
                 self.createLabel(num, "C:%s" % info['component'])
 
         if self.labelOwner and 'owner' in info:
-            self.createLabel(num, "@%s" % info['owner'])
+            if info['owner'] != None:
+                self.createLabel(num, "@%s" % info['owner'])
 
         if self.labelReporter and 'reporter' in info:
-            self.createLabel(num, "@@%s" % info['reporter'])
+            if info['reporter'] != None:
+                self.createLabel(num, "@@%s" % info['reporter'])
         
         for i in info['history']:
-            comment = "Author: %s\n%s" % (i['author'], i['comment'])
+            if i['author']:
+                comment = "Author: %s\n%s" % (i['author'], i['comment'])
+            else:
+                comment = i['comment']
+                
             self.addComment(num, comment)
 
         if self.useURL:
